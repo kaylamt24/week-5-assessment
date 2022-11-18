@@ -34,11 +34,10 @@ module.exports = {
 
     getCities: (req, res) => {
         sequelize.query(`
-        SELECT city_id, city_name AS city, country_id, country_name AS country
-        FROM cities
-        JOIN countries
-        ON country_id = city_id
-        WHERE? *this is not right but I tried to work it out`)
+        SELECT ci.city_id, ci.name AS city, ci.rating, co.country_id, co.name AS country
+        FROM cities AS ci
+        JOIN countries AS co
+        ON ci.country_id = co.country_id;`)
 
         .then(dbRes => res.status(200).send(dbRes[0]))
         .catch(err => console.log(err))  
@@ -46,8 +45,11 @@ module.exports = {
     },
 
     deleteCity: (req, res) => {
-        let {city_id} = req.params
-        sequelize.query(``)
+        let {id} = req.params;
+        sequelize.query(` DELETE FROM cities
+        WHERE city_id = ${id}`)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err)) 
     },
 
     seed: (req, res) => {
@@ -64,7 +66,8 @@ module.exports = {
                 city_id SERIAL PRIMARY KEY,
                 name VARCHAR(30),
                 rating INTEGER,
-                country_id INTEGER REFERENCES countries(country_id)
+                country_id INTEGER NOT NULL REFERENCES 
+                countries(country_id)
 
             );
 
